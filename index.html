@@ -99,38 +99,10 @@
     <div>
       <label for="seg">Tiempo medido</label>
       <div class="field">
-        <input id="seg" type="number" inputmode="decimal" min="0" step="any" value="19" aria-describedby="seg-hint">
+        <input id="seg" type="number" inputmode="decimal" min="0" step="any" value="19">
         <span>seg</span>
       </div>
-      <div class="hint" id="seg-hint">Segundos que tarda en completarse una medida de 0.2 m³.</div>
     </div>
-    <div class="chips" aria-label="Valores rápidos">
-      <button type="button" data-s="15">15 s</button>
-      <button type="button" data-s="19">19 s</button>
-      <button type="button" data-s="30">30 s</button>
-      <button type="button" data-s="60">60 s</button>
-      <button type="button" data-s="80">80 s</button>
-    </div>
-
-    <details>
-      <summary>Ajustes y fórmula</summary>
-      <div class="formula">m³/h = (volumen ÷ segundos) × 3600</div>
-      <div class="hint">Es la misma fórmula del Excel «Calculos cubos hora FINAL»: =(0.2/B3)*3600.</div>
-      <div style="margin-top:12px">
-        <label for="vol">Volumen por medida</label>
-        <div class="field">
-          <input id="vol" type="number" inputmode="decimal" min="0" step="any" value="0.2">
-          <span>m³</span>
-        </div>
-      </div>
-      <div style="margin-top:12px">
-        <label for="hrs">Horas de trabajo al día</label>
-        <div class="field">
-          <input id="hrs" type="number" inputmode="decimal" min="0" step="any" value="8">
-          <span>h</span>
-        </div>
-      </div>
-    </details>
   </section>
 
   <section class="result" aria-live="polite">
@@ -148,9 +120,10 @@
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const VOL = 0.2, HORAS = 8; // m³ por medida y horas por día, igual que el Excel
   const fmt = (n, d) => n.toLocaleString('es-PE', { minimumFractionDigits: d, maximumFractionDigits: d });
   function calc() {
-    const s = parseFloat($('seg').value), v = parseFloat($('vol').value), h = parseFloat($('hrs').value);
+    const s = parseFloat($('seg').value), v = VOL, h = HORAS;
     const out = $('out');
     if (!(s > 0) || !(v > 0)) {
       out.innerHTML = '<span class="err">Ingresa segundos mayores a 0</span>';
@@ -164,8 +137,7 @@
     $('extra').hidden = false; $('copy').hidden = false;
     return { s, v, h, mh };
   }
-  ['seg', 'vol', 'hrs'].forEach((id) => $(id).addEventListener('input', calc));
-  document.querySelectorAll('.chips button').forEach((b) => b.addEventListener('click', () => { $('seg').value = b.dataset.s; calc(); $('seg').focus(); }));
+  $('seg').addEventListener('input', calc);
   $('copy').addEventListener('click', async () => {
     const r = calc(); if (!r) return;
     const txt = `Tiempo: ${fmt(r.s, r.s % 1 ? 1 : 0)} s por ${r.v} m³ → ${fmt(r.mh, 1)} m³/h` + (r.h > 0 ? ` (${fmt(r.mh * r.h, 1)} m³ en ${r.h} h)` : '');
